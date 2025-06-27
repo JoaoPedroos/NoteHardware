@@ -162,11 +162,6 @@ const ComparisonModal = ({ show, onHide, notebookIds, onRemoveFromComparison }) 
                           <div><strong>Série:</strong> {nb.gpu_series || 'N/A'}</div>
                           <div><strong>TGP Detectado:</strong> {nb.tgp_detectado ? formatNumber(nb.tgp_detectado) + 'W' : 'N/A'}</div>
                           <div><strong>TGP Range:</strong> {nb.tgp_range || 'N/A'}</div>
-                          <div><strong>FPS Médio (1080p Ultra):</strong> {nb.fps_medio_1080p_ultra ? formatNumber(nb.fps_medio_1080p_ultra) : 'N/A'}</div>
-                          <div><strong>Performance/Watt:</strong> {nb.performance_por_watt ? formatNumber(nb.performance_por_watt) : 'N/A'}</div>
-                          <div><strong>Desempenho Relativo:</strong> {nb.desempenho_relativo ? formatNumber(nb.desempenho_relativo) + '%' : 'N/A'}</div>
-                          <div><strong>Perda Percentual:</strong> {nb.perda_percentual ? formatNumber(nb.perda_percentual) + '%' : 'N/A'}</div>
-                          <div><strong>Ganho Eficiência Percentual:</strong> {nb.ganho_eficiencia_percentual ? formatNumber(nb.ganho_eficiencia_percentual) + '%' : 'N/A'}</div>
                         </div>
                       )}
                     </td>
