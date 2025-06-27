@@ -1,0 +1,18 @@
+/* src/components/ProfilePage.css */
+
+.profile-page-container {
+  /* Define uma cor de fundo escura para a página inteira */
+  background-color: #212529; /* Um cinza escuro, cor padrão do 'bg-dark' do Bootstrap */
+  
+  /* Garante que o container ocupe pelo menos a altura inteira da tela */
+  min-height: calc(100vh - 72px); /* 100% da altura da tela menos a altura aproximada do seu header */
+
+  /* Adiciona um preenchimento para o conteúdo não colar nas bordas */
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+/* Deixa os labels do formulário com uma cor mais suave */
+.profile-card .form-label {
+    color: rgba(255, 255, 255, 0.75);
+}

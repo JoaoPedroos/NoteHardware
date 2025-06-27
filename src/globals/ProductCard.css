@@ -1,0 +1,139 @@
+/* src/globals/ProductCard.css - VERSÃO ATUALIZADA */
+
+.product-card {
+  background-color: #1e1f20 !important;
+  border: 1px solid #313233 !important;
+  border-radius: 12px !important;
+  color: #e3e3e3;
+  transition: all 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  border-color: #7434fe;
+}
+
+.product-card-img {
+  height: 215px; 
+  object-fit: cover;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.product-card .card-body {
+    padding: 1.25rem;
+}
+
+.product-card-title {
+  font-weight: 600;
+  color: white;
+}
+
+.product-card-desc {
+  font-size: 0.95rem; 
+  color: #a0a0a0;
+  min-height: 50px; /* Adicionado para tentar manter altura consistente */
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Limita a 3 linhas */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-card-price {
+    font-weight: 700;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+/* --- NOVAS CLASSES PARA O MODO DE COMPARAÇÃO --- */
+
+.product-card.selection-mode {
+  border-color: #7434fe !important; 
+  box-shadow: 0 0 10px rgba(116, 52, 254, 0.4);
+  cursor: pointer; 
+}
+
+.product-card.selected-for-comparison {
+  border: 3px solid #00ff00 !important; 
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.6); 
+}
+
+.product-card.selected-for-comparison:hover {
+  transform: translateY(-5px) scale(1.02); 
+}
+
+/* --- ESTILO PARA O BOTÃO FLUTUANTE DE COMPARAÇÃO (ADICIONE AO SEU TEMA GLOBAL OU APP.CSS) --- */
+/* Exemplo de posicionamento para o botão de comparação */
+.comparison-float-button {
+  position: fixed; 
+  bottom: 20px;    
+  right: 20px;     
+  z-index: 1050;   
+  display: flex;
+  align-items: center;
+  gap: 10px; 
+}
+
+@media (max-width: 768px) {
+  .comparison-float-button {
+    bottom: 10px;
+    right: 10px;
+    left: 10px; 
+    justify-content: center;
+  }
+}
+
+/* --- ESTILOS PARA O MODAL DE COMPARAÇÃO (ComparisonModal.js) --- */
+.comparison-table th,
+.comparison-table td {
+    vertical-align: middle; 
+    padding: 10px; 
+    text-align: center; 
+}
+
+.comparison-table .feature-column {
+    width: 200px; 
+    font-weight: bold;
+    text-align: left; 
+    color: #e3e3e3; 
+}
+
+.comparison-table .product-column {
+    min-width: 180px; 
+    max-width: 250px; 
+    overflow: hidden;
+    text-overflow: ellipsis; 
+    white-space: normal; 
+}
+
+.comparison-table .product-column img {
+    display: block; 
+    margin: 0 auto 5px auto; 
+}
+
+.gpu-expand-button {
+  width: 28px; 
+  height: 28px;
+  padding: 0; 
+  font-size: 1.2rem; 
+  display: inline-flex; 
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px; 
+  line-height: 1; 
+  vertical-align: middle; 
+}
+
+.gpu-expanded-details {
+  font-size: 0.85rem; 
+  color: #b0b0b0; 
+  text-align: left; 
+}
+.gpu-expanded-details div {
+    margin-bottom: 3px; 
+}
+.gpu-expanded-details strong {
+    color: #e3e3e3; 
+}

@@ -1,0 +1,36 @@
+/* src/globals/theme.css */
+
+/* 1. Importa a fonte Poppins do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* 2. Aplica os estilos base para todo o site */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #131314 !important; /* Fundo principal escuro */
+  color: #e3e3e3 !important; /* Cor de texto padrão clara */
+}
+
+/* 3. A classe mágica para o texto em gradiente */
+.gradient-text {
+  background: linear-gradient(90deg, #4f3df9, #7434fe, #a52dfd, #e122fe, #fe21d6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 600;
+}
+
+/* 4. Estilo para um botão customizado com o tema Gemini */
+.btn-gemini {
+  background: linear-gradient(90deg, #4f3df9, #7434fe);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 10px 20px;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-gemini:hover {
+  box-shadow: 0 0 15px rgba(116, 52, 254, 0.6);
+  color: white;
+}

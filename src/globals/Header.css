@@ -1,0 +1,11 @@
+.custom-button {
+  background-color: transparent;
+  border: none;
+  text-decoration: underline;
+  color: #000; /* Defina a cor do texto desejada */
+}
+
+.custom-button:hover {
+  color: #0d6efd; /* Defina a cor do texto ao passar o mouse */
+  text-decoration: underline;
+}

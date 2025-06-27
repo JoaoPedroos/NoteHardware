@@ -1,0 +1,17 @@
+/* Adicionar ao final de src/globals/AdminPage.css */
+
+/* Garante que os itens da lista de sugestão da IA fiquem com o fundo escuro correto */
+.list-group-item {
+  background-color: #212529; /* Cor de fundo escura padrão do Bootstrap */
+  border-color: #495057;
+}
+
+/* Garante que o texto dentro do item da lista seja claro */
+.list-group-item, .list-group-item strong {
+    color: #e3e3e3;
+}
+
+/* Melhora a cor do texto secundário (muted) no tema escuro */
+.list-group-item .text-muted {
+    color: #a0a0a0 !important;
+}
