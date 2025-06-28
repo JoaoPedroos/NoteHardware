@@ -16,3 +16,9 @@
 .profile-card .form-label {
     color: rgba(255, 255, 255, 0.75);
 }
+
+.comparison-table th,
+.comparison-table td {
+  padding: 20px 15px !important; /* 12px em cima/embaixo, 15px nos lados */
+  vertical-align: middle; /* Bônus: Centraliza o conteúdo da célula verticalmente */
+}
