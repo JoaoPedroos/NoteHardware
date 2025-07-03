@@ -3,8 +3,8 @@
 import { createClient } from '@supabase/supabase-js'
 
 // O código agora lê as variáveis de ambiente de forma segura
-const supabaseUrl = "https://jtihxmjbaqwijwewswys.supabase.co";
-const supabaseAnonKey = "Mk6k0hMsDcWU6dJKzD7Kx7pA";
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 
 // Verifica se as variáveis foram carregadas corretamente
 if (!supabaseUrl || !supabaseAnonKey) {
