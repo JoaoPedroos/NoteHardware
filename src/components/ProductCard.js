@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Card, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom'; // Importado Link
+import {Link} from 'react-router-dom';
 import '../globals/ProductCard.css'; 
 
 // Recebe as props: isSelectionMode, isCompared, onCardClick
@@ -55,23 +55,15 @@ const ProductCard = ({ product, isSelectionMode, isCompared, onCardClick }) => {
         {!isSelectionMode && (
           <div className="mt-auto">
             {product.price && <h4 className="product-card-price">{formatPrice(product.price)}</h4>}
-            {product.product_url ? (
-                <Button 
-                    as={Link} // Usa o Link do react-router-dom
-                    to={`/notebook/${product.id}`} // Navega para a página de detalhes
-                    className="w-100 btn-gemini" 
-                    // No Link, target="_blank" e rel="noopener noreferrer" geralmente vão no próprio Link/<a>, não no Button.
-                    // Para abrir em nova aba com Link, o ideal é usar onClick e window.open ou passar a prop target no Link se for <a>.
-                    // Se a product_url for externa, o Link deve ser um <a> normal ou o Link component deve ser customizado.
-                    // Por simplicidade, vou manter o Link para a rota interna. Se a URL externa for prioridade, use <a href={product.product_url}>
-                >
-                    Ver Detalhes
-                </Button>
-            ) : (
-                <Button className="w-100 btn-gemini" disabled>
-                    Detalhes (Link Indisponível)
-                </Button>
-            )}
+            
+            {/* --- BOTÃO CORRIGIDO AQUI --- */}
+            <Button 
+                as={Link} // Diz ao botão para agir como um Link
+                to={`/notebook/${product.id}`} // 'to' agora funciona, pois o botão é um Link
+                className="w-100 btn-gemini"
+            >
+                Ver Detalhes
+            </Button>
           </div>
         )}
         
