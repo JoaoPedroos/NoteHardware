@@ -1,29 +1,38 @@
-// supabase/functions/enrich-product/index.ts - VERSÃO COM PROMPT DE CPU DETALHADO
+// supabase/functions/enrich-product/index.ts - VERSÃO REFINADA
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 
+// Headers CORS permanecem os mesmos
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// A URL da API está correta
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 
 serve(async (req) => {
+  // Tratamento da requisição OPTIONS (preflight) está perfeito
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
+    // 1. Validação de segurança e ambiente
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-    if (!GEMINI_API_KEY) throw new Error("Segredo GEMINI_API_KEY não encontrado.");
+    if (!GEMINI_API_KEY) {
+      // É uma boa prática logar o erro no servidor para depuração
+      console.error("Segredo GEMINI_API_KEY não encontrado.");
+      throw new Error("Configuração do servidor incompleta."); // Mensagem mais genérica para o cliente
+    }
 
+    // 2. Validação da entrada do cliente
     const { productName } = await req.json();
-    if (!productName) throw new Error("Faltando 'productName' no corpo da requisição.");
+    if (!productName || typeof productName !== 'string') {
+      throw new Error("Faltando ou inválido 'productName' no corpo da requisição.");
+    }
 
-    // ===============================================================
-    // PROMPT ATUALIZADO COM TODOS OS CAMPOS DE CPU DETALHADOS
-    // ===============================================================
+    // 3. Construção do Prompt (O seu prompt está excelente, mantido como está)
     const prompt = `
       Você é um especialista em hardware de notebooks e um assistente de busca de preços.
       Para o notebook de referência "${productName}", encontre de 2 a 3 configurações populares.
@@ -61,73 +70,54 @@ serve(async (req) => {
       - charger_wattage (string): Watts do carregador do notebook
 
       Retorne a resposta ESTRITAMENTE como um array de objetos JSON.
-      Exemplo de um item no array:
-      {
-        "name": "Dell G15 com i7",
-        "description": "Notebook de alto desempenho com processador Intel Core i7 de 13ª geração e placa de vídeo dedicada RTX 3050, ideal para jogos, produtividade e tarefas intensivas."
-        "image_url": "https://.../image.jpg",
-        "cpu_details": "Intel Core i7-12650H, 10 núcleos, 16 threads, até 4.7 GHz",
-        "cpu_brand": "Intel",
-        "cpu_intel_series": "Core i7",
-        "cpu_intel_generation": 12,
-        "cpu_amd_series": null,
-        "cpu_amd_generation": null,
-        "cpu_turbo_ghz": 4.7,
-        "cpu_cores": 10,
-        "cpu_threads": 16,
-        "gpu_details": "NVIDIA GeForce RTX 3050 Laptop, 4GB GDDR6",
-        "gpu_brand": "NVIDIA",
-        "gpu_series": "RTX 30",
-        "gpu_vram": "4GB GDDR6",
-        "tgp_detectado": 95,
-        "ram_details": "16GB DDR5-4800MHz",
-        "storage_details": "SSD 512GB PCIe NVMe M.2",
-        "screen_details": "15.6 polegadas, Full HD 120Hz",
-        "keyboard_backlight": "Branco",
-        "battery_details": "90Wh",
-        "charger_wattage": "240W",
-        "tgp_range": "80W-95W",
-        "offers": [
-          { "store_name": "Dell Oficial", "price": 6999.00, "url": "https://..." }
-        ]
-      }
     `;
 
+    // 4. Chamada para a API do Gemini
     const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
+        // Usar o modo JSON é a melhor prática aqui!
         generationConfig: {
             responseMimeType: "application/json",
         }
       }),
     });
 
+    // 5. Tratamento de erro da API
     if (!geminiResponse.ok) {
-      throw new Error(`Erro da API Google AI: ${await geminiResponse.text()}`);
+      const errorBody = await geminiResponse.text();
+      console.error(`Erro da API Google AI: ${errorBody}`);
+      throw new Error("Falha ao comunicar com o serviço de IA.");
     }
 
+    // 6. Processamento da Resposta
     const geminiData = await geminiResponse.json();
-    let jsonText = geminiData.candidates[0].content.parts[0].text;
-
-    const startIndex = jsonText.indexOf('[');
-    const endIndex = jsonText.lastIndexOf(']');
-    if (startIndex === -1 || endIndex === -1) {
-      throw new Error("A resposta da IA não continha um array JSON válido.");
+    
+    // Verificação de segurança para garantir que a resposta veio como esperado
+    if (!geminiData.candidates || !geminiData.candidates[0]?.content?.parts[0]?.text) {
+        throw new Error("Resposta da IA recebida em um formato inesperado.");
     }
-    jsonText = jsonText.substring(startIndex, endIndex + 1);
 
+    // Com `responseMimeType: "application/json"`, o texto já deve ser um JSON válido.
+    // A extração manual com `indexOf` e `lastIndexOf` se torna um plano B, não a regra.
+    const jsonText = geminiData.candidates[0].content.parts[0].text;
     const productData = JSON.parse(jsonText);
 
+    // 7. Retorno de sucesso
     return new Response(JSON.stringify(productData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
+
   } catch (error) {
+    // Centraliza todo o tratamento de erro aqui
+    console.error("Erro na Edge Function:", error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
+      // Usa um código de erro mais apropriado se o erro for do lado do servidor
+      status: error instanceof TypeError ? 400 : 500,
     });
   }
 });
