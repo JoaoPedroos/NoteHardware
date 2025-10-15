@@ -1,38 +1,42 @@
-// supabase/functions/enrich-product/index.ts - VERSÃO REFINADA
+// supabase/functions/enrich-product/index.ts - VERSÃO COMPLETA E SEGURA
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 
-// Headers CORS permanecem os mesmos
+// Headers para permitir que seu site chame esta função (CORS)
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// A URL da API está correta
+// URL da API do Gemini
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 
 serve(async (req) => {
-  // Tratamento da requisição OPTIONS (preflight) está perfeito
+  // Responde a requisições 'OPTIONS' (necessário para o CORS funcionar)
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    // 1. Validação de segurança e ambiente
+    // 1. VERIFICAÇÃO DE SEGURANÇA: Checa se a chave da API está configurada nos segredos da Supabase
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
-      // É uma boa prática logar o erro no servidor para depuração
-      console.error("Segredo GEMINI_API_KEY não encontrado.");
-      throw new Error("Configuração do servidor incompleta."); // Mensagem mais genérica para o cliente
+      console.error("Erro Crítico: Segredo GEMINI_API_KEY não foi encontrado no ambiente.");
+      // Lança um erro que será capturado pelo 'catch' e retornará um erro 500
+      throw new Error("A configuração do servidor está incompleta.");
     }
 
-    // 2. Validação da entrada do cliente
+    // 2. VALIDAÇÃO DA REQUISIÇÃO: Checa se o corpo da requisição está correto
     const { productName } = await req.json();
     if (!productName || typeof productName !== 'string') {
-      throw new Error("Faltando ou inválido 'productName' no corpo da requisição.");
+      // Se 'productName' estiver faltando ou não for texto, retorna um erro 400
+      return new Response(JSON.stringify({ error: "O campo 'productName' é obrigatório e deve ser uma string." }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400, // Bad Request
+      });
     }
 
-    // 3. Construção do Prompt (O seu prompt está excelente, mantido como está)
+    // 3. CRIAÇÃO DO PROMPT: Seu prompt detalhado é inserido aqui
     const prompt = `
       Você é um especialista em hardware de notebooks e um assistente de busca de preços.
       Para o notebook de referência "${productName}", encontre de 2 a 3 configurações populares.
@@ -72,52 +76,47 @@ serve(async (req) => {
       Retorne a resposta ESTRITAMENTE como um array de objetos JSON.
     `;
 
-    // 4. Chamada para a API do Gemini
+    // 4. CHAMADA PARA A API DO GEMINI
     const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        // Usar o modo JSON é a melhor prática aqui!
         generationConfig: {
             responseMimeType: "application/json",
         }
       }),
     });
 
-    // 5. Tratamento de erro da API
+    // 5. TRATAMENTO DE ERRO DA API EXTERNA
     if (!geminiResponse.ok) {
       const errorBody = await geminiResponse.text();
-      console.error(`Erro da API Google AI: ${errorBody}`);
-      throw new Error("Falha ao comunicar com o serviço de IA.");
+      console.error(`Erro da API do Gemini: Status ${geminiResponse.status} - ${errorBody}`);
+      throw new Error("O serviço de IA retornou um erro.");
     }
 
-    // 6. Processamento da Resposta
+    // 6. PROCESSAMENTO DA RESPOSTA DE SUCESSO
     const geminiData = await geminiResponse.json();
-    
-    // Verificação de segurança para garantir que a resposta veio como esperado
-    if (!geminiData.candidates || !geminiData.candidates[0]?.content?.parts[0]?.text) {
-        throw new Error("Resposta da IA recebida em um formato inesperado.");
+    if (!geminiData.candidates?.[0]?.content?.parts?.[0]?.text) {
+        console.error("Formato de resposta inesperado da API Gemini:", geminiData);
+        throw new Error("A IA retornou uma resposta em um formato inválido.");
     }
 
-    // Com `responseMimeType: "application/json"`, o texto já deve ser um JSON válido.
-    // A extração manual com `indexOf` e `lastIndexOf` se torna um plano B, não a regra.
     const jsonText = geminiData.candidates[0].content.parts[0].text;
     const productData = JSON.parse(jsonText);
 
-    // 7. Retorno de sucesso
+    // 7. RETORNO DE SUCESSO PARA O CLIENTE (REACT)
     return new Response(JSON.stringify(productData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
 
   } catch (error) {
-    // Centraliza todo o tratamento de erro aqui
-    console.error("Erro na Edge Function:", error.message);
-    return new Response(JSON.stringify({ error: error.message }), {
+    // CAPTURA CENTRALIZADA DE ERROS: Qualquer erro no bloco 'try' cairá aqui.
+    console.error("Erro geral na Edge Function:", error.message);
+    return new Response(JSON.stringify({ error: error.message || "Ocorreu um erro inesperado no servidor." }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      // Usa um código de erro mais apropriado se o erro for do lado do servidor
-      status: error instanceof TypeError ? 400 : 500,
+      status: 500, // Internal Server Error
     });
   }
 });
